@@ -1,0 +1,561 @@
+---
+title: "Visualization with R: ggplot2 and plotly"
+author: "Christina Maimone"
+date: '`r Sys.Date()`'
+always_allow_html: yes
+output:
+  pdf_document:
+    toc: no
+  html_document:
+    toc: yes
+    toc_float: yes
+    self_contained: no
+params:
+  answers: FALSE
+---
+
+<!--
+To Knit the file:
+setwd("~/training/ggplot")
+rm(list = ls())
+rmarkdown::render('script1.Rmd',
+                  output_format="html_document",
+                  output_file = 'code.html',
+                  params = list(answers=FALSE))
+rmarkdown::render('script1.Rmd',
+                  output_format="html_document",
+                  output_file = 'code_with_answers.html',
+                  params = list(answers=TRUE))
+--->
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_knit$set(root.dir="~/training/ggplot")
+#setwd("~/training/ggplot")
+```
+
+```{r, echo=FALSE, eval=TRUE}
+answers<-params$answers
+```
+
+An essential reference for ggplot is the [Data Visualization with ggplot2](https://www.rstudio.com/wp-content/uploads/2015/03/ggplot2-cheatsheet.pdf).  It's useful to have this handy.
+
+# Load the packages
+
+If you don't have them installed yet, then first install some packages:
+
+```{r, eval=FALSE}
+install.packages(c("tidyverse", "ggthemes", "plotly"))
+```
+
+Then load ones we'll be using
+
+```{r}
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(ggthemes)
+library(plotly)
+```
+
+# Caveats
+
+This notebook is focused on getting you acquainted with `ggplot2` and `plotly`, not teaching good data visualization practices.  Some of the plots created below are not necessarily the best way to visualize the example data sets.
+
+Also, I've included the steps necessary to manipulate the original data into the form needed for plotting because this is a significant, but often ignored, part of learning how to make plots.  The data manipulation steps aren't covered in great detail, but the code is provided.  
+
+# Data
+
+Load the data we'll be working with
+
+```{r, eval=FALSE}
+install.packages("babynames")
+```
+
+```{r}
+library(babynames)
+```
+
+```{r}
+head(babynames)
+```
+
+
+Ok, so what's a tibble?  It's a fancy `data.frame` that is part of the `tidyverse` (e.g. `dplyr`, `ggplot2`, etc.).  It makes `data.frame`s a little nicer, like not printing all rows by default.  You can use it like a `data.frame`.
+
+# Example 1
+
+Let's explore the proportion of names that begin with each letter
+
+## Get the Data to Plot
+
+First, manipulate the data (the `dplyr` way)
+
+```{r}
+babynames <- mutate(babynames, initial=substr(name, 1, 1))
+initial_props <- group_by(babynames, year, sex, initial) %>% 
+  summarize(count=sum(n), totalprop=sum(prop)) %>%
+  ungroup()
+```
+
+Without `dplyr`, if you prefer:
+
+```{r, eval=FALSE}
+babynames$initial <- substr(babynames$name, 1, 1)
+initial_props <- aggregate(babynames[,c("n","prop")], by=list(babynames$year, babynames$sex, babynames$initial), sum)
+names(initial_props)<- c("year", "sex", "initial", "count", "totalprop")
+```
+
+## Simple Plot
+
+Ok, make a simple plot first.  Let's look at girls with letter A names:
+
+```{r}
+initial_props %>% filter(sex=="F", initial=="A") %>% 
+  ggplot(aes(y=totalprop, x=year)) + geom_line()
+```
+
+Or, without `dplyr`
+
+```{r, eval=FALSE}
+ggplot(initial_props[initial_props$sex=="F"&initial_props$initial=="A",], 
+       aes(y=totalprop, x=year)) + geom_line()
+```
+
+## Multiple lines
+
+Add in boys too - we want two different color lines, so we'll use the `aes` parameter `color`:
+
+```{r}
+initial_props %>% filter(initial=="A") %>% 
+  ggplot(aes(y=totalprop, x=year, color=sex)) + geom_line()
+```
+
+Or, without `dplyr`
+
+```{r, eval=FALSE}
+ggplot(initial_props[initial_props$initial=="A",], 
+       aes(y=totalprop, x=year, color=sex)) + geom_line()
+```
+
+## Facets
+
+Instead of just one letter, we could make a plot for each letter using facets:
+
+```{r}
+ggplot(initial_props, aes(y=totalprop, x=year, color=sex)) +
+  geom_line() +
+  facet_wrap(~initial)
+```
+
+Note that above, we split the plot creation commands on multiple lines.  If you do this, make sure to end the line with a `+` or split within a `()` so that R doesn't think you're done with the line.  
+
+For facets, the options are `facet_wrap`, which automatically lays out rows and columns, or `facet_grid` which can be used to specify values to spread over rows or columns.  Facets use the formula specification, which is `y~x`.  So variables to the left of `~` specify layout down the y-axis (so appearing as rows), while variables to the right specify layout along the x axis (so appearing as columns)  For `facet_wrap` you always just put the variable on the right of `~`.  You can change the default layout with other options to the function.  You can use facets with multiple variables.
+
+You can see that by default all of the plots have the same axes -- the same range.  This lets you compare easily across plots, but you can change this.  
+
+## Cleanup/Formatting
+
+Ok, now some plot cleanup:
+
+Let's rotate the year labels so that we can read them easier.  The layout of the labels is part of the plot `theme`.
+
+```{r}
+ggplot(initial_props, aes(y=totalprop, x=year, color=sex)) +
+  geom_line() + 
+  facet_wrap(~initial) +
+  theme(axis.text.x = element_text(angle = -90, vjust=0.5))
+```
+
+And make better labels:
+
+```{r}
+ggplot(initial_props, aes(y=totalprop, x=year, color=sex)) +
+  geom_line() + 
+  facet_wrap(~initial) +
+  theme(axis.text.x = element_text(angle = -90, vjust=0.5)) +
+  labs(title="Baby Names First Initial", x="Year", y="Proportion of Babies")
+```
+
+The legend label has to be changed by reference to the color scale.  You can change the x and y labels that way too instead of using `labs` (which is a convenience):
+
+```{r}
+ggplot(initial_props, aes(y=totalprop, x=year, color=sex)) +
+  geom_line() + 
+  facet_wrap(~initial) +
+  ggtitle("Baby Names First Initial") +
+  scale_x_continuous(name="Year") +
+  scale_y_continuous(name="Proportion of Babies") +
+  scale_color_discrete(labels=c("Female","Male"), name="Sex") +
+  theme(axis.text.x = element_text(angle = -90, vjust=.5)) 
+```
+
+Our y-axis is a little crowded, and we don't need all of those gridlines:
+
+```{r}
+ggplot(initial_props, aes(y=totalprop, x=year, color=sex)) +
+  geom_line() + 
+  facet_wrap(~initial) +
+  ggtitle("Baby Names First Initial") +
+  scale_x_continuous(name="Year") +
+  scale_y_continuous(name="Proportion of Babies", 
+                     breaks=c(0,.1,.2)) +
+  scale_color_discrete(labels=c("Female","Male"), name="Sex") +
+  theme(axis.text.x = element_text(angle = -90, vjust=.5),
+        panel.grid.minor = element_blank()) 
+```
+
+
+# Challenge 1
+
+Part 1: Make a similar plot as above, but group by sex instead of initial letter.  Only plot names that begin with vowels.  What formatting changes do you want to make?
+
+Part 2: Then change the plot to a stacked area plot so you can see the total number of names starting with vowels over time.  Hint: find the correct geom to use, then look at the help to find the option to make it stacked.  Hint 2: the aesthetic `color` refers to line color.  `fill` may be useful instead.
+
+Note: The facet labels are pulled automatically from the names of the variable after it's coverted to a factor.  To change the labels (or the order of the groups), you have to change the factor.  This is a little tricky.  The answer will include this code, but you may want to leave those labels as is for now.
+
+```{r, echo=answers, eval=answers}
+filter(initial_props, initial %in% c("A","E","I","O","U","Y")) %>% 
+  mutate(sex=factor(sex, levels=c("F","M"), labels=c("Female", "Male"))) %>%
+  ggplot(aes(y=totalprop, x=year, color=initial)) +
+  geom_line() + 
+  facet_wrap(~sex) +
+  labs(title="Baby Names First Initial", x="Year", y="Proportion of Babies") +
+  scale_color_discrete(name="First Initial") +
+  theme(axis.text.x = element_text(angle = -90, vjust=.5)) 
+```
+
+```{asis, echo=answers}
+To change the factor not using `dplyr`:
+```
+
+```{r, eval=FALSE, echo=answers}
+initial_props$sex<-factor(initial_props$sex, levels=c("F","M"), labels=c("Female", "Male"))
+```
+
+
+```{r, echo=answers, eval=answers}
+filter(initial_props, initial %in% c("A","E","I","O","U","Y")) %>%
+  mutate(sex=factor(sex, levels=c("F","M"), labels=c("Female", "Male"))) %>%
+  ggplot(aes(y=totalprop, x=year, fill=initial)) +
+  geom_area(position="stack") + 
+  facet_wrap(~sex) +
+  labs(title="Baby Names First Initial", x="Year", y="Proportion of Babies") +
+  scale_fill_discrete(name="First Initial") +
+  theme(axis.text.x = element_text(angle = -90, vjust=.5)) 
+```
+
+# Example 2
+
+Let's look at unisex names.  For reference: https://fivethirtyeight.com/features/there-are-922-unisex-names-in-america-is-yours-one-of-them/ and http://flowingdata.com/2013/09/25/the-most-unisex-names-in-us-history/ 
+
+## Data
+
+We'll just look among the 1000 most common names by total count since 1950.  We'll define unisex names as ones with roughy equal numbers of men and women.
+
+```{r}
+topnames<-babynames %>% filter(year>=1950) %>% 
+  group_by(name) %>% 
+  summarize(total=sum(n)) %>%
+  arrange(desc(total)) %>%
+  head(1000) %>%
+  merge(babynames) %>%
+  filter(year >= 1950) %>%
+  mutate(sex=recode(sex, "F"="Female", "M"="Male")) %>%
+  group_by(name, sex, total) %>%
+  summarize(sextotal=sum(n)) %>%
+  spread(key=sex, value=sextotal) %>%
+  mutate(ratio=(Male-Female)/total)
+```
+
+without `dplyr`:
+
+```{r, eval=FALSE}
+totalcounts<-sort(tapply(babynames$n[babynames$year>=1950], babynames$name[babynames$year>=1950], sum), decreasing=TRUE)[1:1000]
+topnames<-data.frame(name=names(totalcounts), total=totalcounts)
+topnames<-merge(topnames, babynames)
+topnames<-topnames[topnames$year>=1950, ]
+topnames<-aggregate(topnames$n, by=list(topnames$name, topnames$sex, topnames$total), sum)
+names(topnames)<-c("name","sex","total","sextotal")
+topnames$sex<-ifelse(topnames$sex=="M","Male","Female")
+topnames<-spread(topnames, key=sex, value=sextotal)
+topnames$ratio<-(topnames$Male-topnames$Female)/topnames$total
+```
+
+Note the use of `spread` from `tidyr` above.  This is important because to make a scatterplot, we need to have our x and y values in different variables.  We can't easily separate x and y values by group (such as sex).
+
+
+## Scatterplot to Find Unisex Names
+
+Let's use a plot to find unisex names.  We'll plot the number of boys with the name vs. the number of girls and look for names near the diagonal.  Instead of aggreating the counts by gender first, we'll let ggplot do it.
+
+```{r}
+ggplot(topnames, aes(x=Male, y=Female)) + geom_point()
+```
+
+It looks like there might be a few, but none of the most common names (makes sense).  We could try a log scale:
+
+```{r}
+ggplot(topnames, aes(x=Male, y=Female)) + geom_point() +
+  scale_x_log10() +
+  scale_y_log10()
+```
+
+Well that's kind of interesting.  The missing chunk in the bottom left is because the data set doesn't have names where there were fewer than 5 people.  Another approach: limit the range on the axes to just look at the bottom left corner:
+
+```{r}
+ggplot(topnames, aes(x=Male, y=Female)) + geom_point() + 
+  lims(x=c(0,250000), y=c(0,250000))
+```
+
+The warning comes from setting limits on the x and y axis excluding some points.
+
+Let's add in a diagonal line for reference:
+
+```{r}
+ggplot(topnames, aes(x=Male, y=Female)) + geom_point() + 
+  lims(x=c(0,250000), y=c(0,250000)) +
+  geom_abline(slope=1, intercept=0)
+```
+
+Color points by how boy or girl they are, and let's make them a little bigger
+
+```{r}
+ggplot(topnames, aes(x=Male, y=Female, color=ratio)) + geom_point(size=2) + 
+  lims(x=c(0,250000), y=c(0,250000)) +
+  geom_abline(slope=1, intercept=0, color="gray60") + 
+  scale_colour_gradient(low = "pink", high = "blue", name="Gender Split", 
+                        breaks=c(.9,0,-.9), labels=c("Male","Neutral","Female")) 
+```
+
+Now, for the points we care about, let's label them.  We could label all of them, but we really just want to label the points near the line:
+
+```{r}
+ggplot(topnames, aes(x=Male, y=Female, color=ratio)) + geom_point(size=2) + 
+  lims(x=c(0,150000), y=c(0,150000)) +
+  geom_abline(slope=1, intercept=0, color="gray60") + 
+  scale_colour_gradient(low = "pink", high = "blue", name="Gender Split", 
+                        breaks=c(.9,0,-.9), labels=c("Male","Neutral","Female")) +
+  geom_text(aes(label=ifelse(ratio< .2, as.character(name), '')),
+            hjust=-.25, vjust=0.5, color="gray10", fontface = "bold", size=3) 
+```
+
+Not bad, but a little cluttered.  Useful for an exploratory plot.  Probably not something we'd want to use for presentation.
+
+# Example 3
+
+Continue as above, looking at unisex names, but make a bar chart.  
+
+We need the Male and Female columns back together in one, because we're no longer plotting them against each other -- instead, we're grouping again.  Use `gather` to undo what we did with `spread`.
+
+```{r}
+topnames2<-gather(topnames, key="sex",value="sextotal", Male, Female)
+```
+
+
+We only want to look at the names that score the lowest on `ratio` (absolute value).  And we already have the counts calculated, so we tell `geom_bar` that so it doesn't try to do the counting itself.
+
+```{r}
+ggplot(topnames2[abs(topnames2$ratio)<.3,], aes(x=name, y=sextotal, group=sex, fill=sex)) + 
+  geom_bar(stat="identity") +
+  labs(title="Popular Unisex Names", x="", y="Count")
+```
+
+Plot proportions instead of counts.  And let's use slightly different colors (there are different ways to specify colors, but below we use hex codes.  See: https://en.wikipedia.org/wiki/Web_colors):
+
+```{r}
+ggplot(topnames2[abs(topnames2$ratio)<.3,], aes(x=name, y=sextotal, group=sex, fill=sex)) + 
+  geom_bar(stat="identity", position="fill") +
+  labs(title="Popular Unisex Names", x="", y="Count") + 
+  geom_hline(yintercept=.5) +
+  scale_fill_manual(values=c("#ff33cc","#1e90ff"))
+```
+
+Lose the gray background with the minimal theme, and we don't need horizontal grid lines for a bar chart:
+
+```{r}
+ggplot(topnames2[abs(topnames2$ratio)<.3,], aes(x=name, y=sextotal, group=sex, fill=sex)) + 
+  geom_bar(stat="identity") +
+  labs(title="Popular Unisex Names", x="", y="Count") +
+  theme_minimal() +
+  theme(panel.grid.major.x = element_blank()) 
+```
+
+Note that the order of `theme_minimal` and `theme` matters.  The latter will take precedence over the former.
+
+## Themes
+
+We used `theme_minimal` above to style the plot.  This is one of the themes built into `ggplot2`.  There are other themes available in the `ggthemes` package.  First, a base plot without themes:
+
+```{r}
+initial_props %>% 
+  filter(initial=="A") %>% 
+  ggplot(aes(y=totalprop, x=year, color=sex)) + 
+  geom_line() +
+  ggtitle("Baby Names Starting with A") 
+```
+
+Then, the [FiveThirtyEight](https://fivethirtyeight.com/) theme:
+
+```{r}
+initial_props %>% 
+  filter(initial=="A") %>% 
+  ggplot(aes(y=totalprop, x=year, color=sex)) + 
+  geom_line() +
+  ggtitle("Baby Names Starting with A") +
+  theme_fivethirtyeight()
+```
+
+With the Stata theme (if you want to fool your audience?)
+
+```{r}
+initial_props %>% 
+  filter(initial=="A") %>% 
+  ggplot(aes(y=totalprop, x=year, color=sex)) + 
+  geom_line() +
+  ggtitle("Baby Names Starting with A") +
+  theme_stata()
+```
+
+
+See a list of available themes with examples at https://cran.r-project.org/web/packages/ggthemes/vignettes/ggthemes.html
+
+
+
+# Challenge 2
+
+Using `topnames`, make another scatterplot, but filter out names that aren't unisex (use `ratio` and set the cutoff youself).  Change the size (the area, not the radius) of the points to be scaled according to the total number of people with the name.  Fix the legend title.  Set the x and y axes to have the same limits.  Apply a theme of your choice to the plot.
+
+Hint: you need an option at the bottom of the scales section on the `ggplot2` cheatsheet.
+
+```{r, echo=answers, eval=answers}
+topnames %>% 
+  filter(abs(ratio) < .35) %>%
+  ggplot(aes(x=Male, y=Female, size=Female+Male)) +
+  geom_point() +
+  scale_size_area(name="Total") +
+  xlim(0,110000) +
+  ylim(0,110000) +
+  theme_few()
+```
+
+
+```{r, echo=answers, eval=FALSE}
+# above, without dplyr
+ggplot(topnames[topnames$ratio < .35,], 
+       aes(x=Male, y=Female, size=Female+Male)) +
+  geom_point() +
+  scale_size_area(name="Total") +
+  xlim(0,110000) +
+  ylim(0,110000) +
+  theme_few()
+```
+
+
+# Saving Plots
+
+`ggsave` will save the last plot made.  Or, you can save the plot with a name and send it to `ggsave`.  The file extension determines the image type.
+
+```{r, eval=FALSE}
+ggsave("mybarchart.pdf")
+```
+
+or 
+
+```{r, eval=FALSE}
+mybarchart<- ggplot(topnames[topnames$ratio<.3,], aes(x=name, y=sextotal, group=sex, fill=sex)) + 
+  geom_bar(stat="identity") +
+  labs(title="Popular Unisex Names", x="", y="Count") +
+  theme_minimal() +
+  theme(panel.grid.major.x = element_blank()) 
+ggsave("mybarchart.png", mybarchart)
+```
+
+
+
+# Plotly
+
+[Plotly Examples and Documentation](https://plot.ly/r/) 
+
+## `ggplotly`
+
+One of the easy things you can do with plotly is use it with a plot from `ggplot` to add tooltips when you hover over points or lines.  You can save `ggplot` plots as objects.
+
+Let's look at what's going on with those A names by looking at the first two letters:
+
+```{r}
+babynames <- mutate(babynames, first2=substr(name, 1, 2))
+anames <- babynames %>%
+  filter(initial=="A") %>%
+  group_by(year, sex, first2) %>% 
+  summarize(count=sum(n), totalprop=sum(prop)) %>%
+  ungroup()
+plot1<-filter(anames, sex=="F") %>%
+  ggplot(aes(x=year, y=totalprop, color=first2)) +
+  geom_line()
+plot1
+```
+
+Note that this approach to pulling the data is going to miss years with no observations (say for names starting with "Aw" or other uncommon pairs).  So our lines won't be 100% accurate, but we're just going to ignore that.
+
+Now, this is a messy plot, with too many lines.  It's hard to distinguish the colors.  But if we're doing exploratory analysis, it might still be useful, if we could tell what each line is.  This is where plotly comes in:
+
+```{r}
+ggplotly(plot1)
+```
+
+This would have also been very useful when we were looking at unisex names above.
+
+## Plotting with Plotly
+
+You can also make plots directly with plotly.  Why?  Maybe you want plots that are prettier than the base graphics but don't like `ggplot`.  I still recommend using `ggplot`, but you don't have to.
+
+```{r}
+plot_ly(anames[anames$sex=="F",], x=~year, y=~totalprop, color=~first2, 
+        type = 'scatter', mode = 'lines')
+```
+
+Note the `~` in front of the names of the variables.  Colors and tooltips are different from the defaults from `ggplotly`.  
+
+Or maybe you want to make a 3D plot (ggplot doesn't do that).  Note that this example plot is not a good choice for something to actually plot in 3D -- just an example to show how plotly works.
+
+```{r}
+plot_ly(anames[anames$sex=="F",], x=~year, z=~totalprop, y=~first2, color=~first2, line=list(width=4)) %>% add_lines() %>%
+    layout(scene = list(xaxis = list(title = 'Year'),
+                     zaxis = list(title = 'Proportion'),
+                     yaxis = list(title = 'Starting Letters')))
+```
+
+
+## Other
+
+You can also publish plotly plots to their web service, but we're not going to cover that here.  See the plotly documentation online for examples of how to do this.
+
+# Resources
+
+[`ggplot2` Elegant Graphics for Data Analysis](http://ggplot2.org/book/) by Hadley Wickam, who wrote the package.  The book can also be downloaded as a pdf by going through the Library.  The book's code is [here](https://github.com/hadley/ggplot2-book).
+
+[R Graphics Cookbook](https://ase.tufts.edu/bugs/guide/assets/R%20Graphics%20Cookbook.pdf)
+
+[Cookbook for R](http://www.cookbook-r.com/Graphs/)
+
+[`ggplot` Tutorial](http://tutorials.iq.harvard.edu/R/Rgraphics/Rgraphics.html) From the Harvard IQSS Data Science Services group.
+
+[R Graph Gallery](http://www.r-graph-gallery.com/portfolio/ggplot2-package/) for `ggplot`
+
+[`ggplot` Tutorial](http://r-statistics.co/ggplot2-Tutorial-With-R.html) from Selva Prabhakaran with examples of many different kinds of plots
+
+[Plotly Tutorial](https://www.datacamp.com/community/blog/a-free-interactive-plotly-r-tutorial)
+
+[Plotly for R](https://cpsievert.github.io/plotly_book/index.html) by Carson Sievert
+
+Software Carpentry: [R for Reproducible Scientific Analysis](http://swcarpentry.github.io/r-novice-gapminder/08-plot-ggplot2/): course material for introductory R workshop, includes a section on `ggplot`
+
+[R for Data Science](http://r4ds.had.co.nz/): free online book using the `tidyverse` of packages, includes a chapter on [Graphics for communication](http://r4ds.had.co.nz/graphics-for-communication.html) which doesn't teach `ggplot` so much as give you good principles of making charts with it.
+
+[Swirl](http://swirlstats.com/): Interactive tutorials that you run in R.  The Exploratory Data Analysis course includes sections on `ggplot`.
+
+[Stack Overflow](http://stackoverflow.com/questions/tagged/ggplot): great for searching for issues; most questions you have will have already been asked by someone else; be aware of the date of answers, as sometimes an answer may be a little out of date.
+
+A comparison on Base graphics and ggplot from [Flowing Data](http://flowingdata.com/2016/03/22/comparing-ggplot2-and-r-base-graphics/), which is a great site in general for R graphics, but he doesn't use `ggplot`.
+

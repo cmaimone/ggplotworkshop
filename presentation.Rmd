@@ -1,0 +1,322 @@
+---
+output:
+  revealjs::revealjs_presentation:
+    incremental: false
+    self_contained: true
+    center: true
+    theme: default
+    css: custom.css
+    transition: slide
+    slide_level: 1
+    reveal_options:
+      width: 100%
+      height: 100%
+    includes:
+      in_header: header.html
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(fig.height=5)
+```
+
+
+# Visualization in R:{data-background-color="#4E2A84" .white-font}
+
+## <span class="white-font">`ggplot2` and `plotly`</span>
+\
+\
+Researcher's Toolkit  
+27 April 2017
+
+Christina Maimone  
+
+
+
+# Workshop Outline
+
+Visualization in R \
+`ggplot`: Examples and Background \
+What is Plotly?\
+Let's make some plots \
+
+
+# Visualization in R {data-background-color="#E4E0EE" .gray-font}
+
+---
+
+## Built-in Base R Graphics
+
+R comes with plotting functions built in.  
+
+---
+
+```{r}
+hist(rnorm(100))
+```
+
+---
+
+```{r}
+plot(x=runif(30), y=runif(30))
+```
+
+---
+
+* Good for a lot of situations
+* But they often aren't very attractive
+* Grouping is difficult
+* Legends can be tricky and aren't automatic
+* Different plots are made in different ways
+
+---
+
+## R Plotting Systems
+
+* base graphics
+* `ggplot2`
+* `lattice`: around for a long time, not widely used
+* `ggvis`: builds on `ggplot2`, extending for interactive graphics, but not complete yet
+
+---
+
+## Additional Visualization Packages
+
+* `plotly`
+* `igraph`: for network graphs
+* `ggmap` and `leaflet`: maps (other packages for this too)
+* `googleVis`: Google Charts API
+* `rgl`: 3D plots
+* `dygraphs`: interactive time series
+
+\
+Other specialized packages for fields such as genomics
+
+---
+
+# ggplot {data-background-color="#E4E0EE" .gray-font}
+
+---
+
+Let's start with the same plots as before
+
+```{r}
+library(ggplot2)
+```
+
+---
+
+```{r, error=FALSE, warning=FALSE, message=FALSE}
+mydata<-data.frame(vals=rnorm(100)) ## ggplot expects a data.frame
+ggplot(mydata, aes(vals))+geom_histogram()
+```
+
+
+---
+
+```{r}
+mydata<-data.frame(x=runif(30), y=runif(30))
+ggplot(mydata, aes(x, y))+geom_point()
+```
+
+---
+
+Those look a little better (maybe)...
+
+\
+But the code is more complicated
+
+---
+
+## Could use the `qplot` shorcut 
+
+\
+`qplot` is a `ggplot2` function
+
+\
+Works a lot the base graphics `plot`
+
+---
+
+```{r, message=FALSE}
+qplot(rnorm(100))
+```
+
+---
+
+```{r}
+qplot(runif(30), runif(30))
+```
+
+---
+
+But we're going to ignore `qplot` and only use `ggplot` to avoid confusion
+
+---
+
+## Better Examples
+
+`ggplot` is most useful for more complicated plots
+
+---
+
+Basic Scatterplot
+
+```{r}
+# using mpg data set that comes with ggplot2
+ggplot(mpg, aes(displ, hwy)) + geom_point() 
+```
+
+---
+
+Add a third dimension with color
+
+```{r}
+ggplot(mpg, aes(displ, hwy, colour = class)) + geom_point() 
+```
+
+---
+
+Add linear trend lines by class
+
+```{r}
+ggplot(mpg, aes(displ, hwy, colour = class)) + 
+  geom_point() + geom_smooth(method="lm", se=FALSE)
+```
+
+---
+
+Separate by class
+
+```{r}
+ggplot(mpg, aes(displ, hwy, colour = class)) + 
+  geom_point() + geom_smooth(method="lm", se=FALSE) + 
+  facet_wrap(~class)
+```
+
+---
+
+## A few polished examples
+
+---
+
+# {data-background-image="http://minimaxir.com/img/ggplot-tutorial/buzzfeed-listicle-scatterplot.png" data-background-size=contain class="full"}
+
+<div class="caption"><a href="http://minimaxir.com/2015/02/ggplot-tutorial/">Source: Max Woolf</a></div>
+
+---
+
+# {data-background-image="https://raw.githubusercontent.com/minimaxir/movie-gender/76581d9468d4b59dfbd6963c21a6c85e2339bd82/movie-gender-10.png" data-background-size=contain class="full"}
+
+<div class="caption"><a href="https://github.com/minimaxir/movie-gender/blob/master/movie_gender.ipynb">Source: Max Woolf</a></div>
+
+---
+
+# {data-background-image="http://juliasilge.com/figs/2017-04-15-Gender-Pronouns/austen-1.png" data-background-size=contain class="full"}
+
+<div class="caption"><a href="http://juliasilge.com/blog/Gender-Pronouns/">Source: Julia Silge</a></div>
+
+
+
+
+---
+
+## `ggplot` or `ggplot2`?
+
+The name of the package is <span style="color:#836EAA">`ggplot2`</span>.  
+
+The name of the function used to create a plot is <span style="color:#836EAA">`ggplot`</span>.  
+
+---
+
+## But...
+
+You'll see `ggplot` used to refer to the whole system as well (as I do here).  `ggplot2` started with `ggplot`, which isn't used anymore.
+
+---
+
+## What makes up a `ggplot` plot?
+
+---
+
+## Data
+
+<span style="color:#836EAA">`ggplot(mpg)`</span>
+
+\
+a `data.frame` to use
+
+---
+
+## Aesthetics
+
+`ggplot(mpg,` <span style="color:#836EAA">`aes(x=displ, y=hwy, color=class)`</span>`)`
+
+\
+position (x, y) \
+size &bull; color &bull; shape \
+fill &bull; linetype &bull; transparency
+
+\
+<small>See https://cran.r-project.org/web/packages/ggplot2/vignettes/ggplot2-specs.html</small>
+
+---
+
+## Geoms
+
+`ggplot(mpg, aes(x=displ, y=hwy, color=class)) + `\
+<span style="color:#836EAA">`geom_point()`</span>
+
+\
+What type of plot to draw?
+
+One or two variables?
+
+Discrete or continuous values?
+
+---
+
+## Other Components
+
+* **Coordinates**: the grid you're plotting on
+* **Stats**: transformations of the data
+* **Scales**: breaks, colors, labels, transformations
+* **Facets**: plots for different groups
+* **Labels**: title, axes
+* **Themes**: overall style
+
+
+---
+
+
+# Plotly {data-background-color="#E4E0EE" .gray-font}
+
+---
+
+## Use Plotly for
+
+* Interactive graphics
+* Sharing plots online
+* Editable plots (zoom, select observations, etc.)
+* Teams working in multiple languages (MATLAB, R, Python, JavaScript)
+
+---
+
+# {data-background-image="https://cpsievert.github.io/plotly_book/images/gapminder-highlight-animation.gif" data-background-size=contain class="full"}
+
+<div class="caption"><a href="https://cpsievert.github.io/plotly_book/">Source: Carson Sievert</a></div>
+
+---
+
+https://plot.ly/~RPlotBot/3260.embed
+
+
+
+# Code {data-background-color="#4E2A84" .white-font}
+
+This presentation and the code we're using are available at
+
+
+
+
+
+
+

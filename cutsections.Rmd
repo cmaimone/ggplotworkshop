@@ -1,0 +1,100 @@
+# Example 3
+
+Let's look at names where the sex distribution has shifted significantly over time.  Get the data with the command in the "Run This" section below.  Then, skip below to the plot section.
+
+## Run This
+
+*During the workshop, just run this to get the data.*  Details below show how this dataset was created.
+
+```{r, eval=FALSE}
+commonswitchnames<-read.csv()
+```
+
+## Data setup details
+
+Here's the details of how the dataset above was created -- look at the details after the workshop if you're interested.
+
+First, we need to get our data in shape.  For each name-year, we need the number and proportion of male and female babies:
+
+```{r}
+sexcomp<-spread(babynames[,c("year","sex","name","n")], sex, n)
+names(sexcomp)[3:4]<-c("female","male") # helps avoid conflict with F meaning FALSE
+sexcomp$male<-ifelse(is.na(sexcomp$male), 0, sexcomp$male)
+sexcomp$female<-ifelse(is.na(sexcomp$female), 0, sexcomp$female)
+sexcomp$maleprop<-sexcomp$male/(sexcomp$male+sexcomp$female)
+sexcomp$femaleprop<-sexcomp$female/(sexcomp$male+sexcomp$female)
+```
+
+Now we want to see if there are names with > .7 (arbitrary choice) for one gender and then > .7 for the other gender later.  To put this another way, we need a name that has `max(maleprop)` > .7 and `max(femaleprop)` > .7:
+
+```{r}
+switchnames <- sexcomp %>%
+  group_by(name) %>%
+  mutate(malemax=max(maleprop), femalemax=max(femaleprop)) %>%
+  filter(malemax > .7 & femalemax > .7) %>%
+  select(name) 
+```
+
+Without `dplyr`:
+
+```{r, eval=FALSE}
+malemax<-tapply(sexcomp$maleprop, sexcomp$name, max)
+femalemax<-tapply(sexcomp$femaleprop, sexcomp$name, max)
+switchnames<-sexcomp$name[sexcomp$name %in% names(malemax[malemax>.7]) &
+  sexcomp$name %in% names(femalemax[femalemax>.7])]
+```
+
+This is a lot of names still.  Let's just look at the more common ones -- at least 15,000 babies of each sex (arbitrary, choosen to get a good data set size):
+
+```{r}
+commonnames<-sexcomp %>%
+  group_by(name) %>%
+  mutate(maletotal=sum(male), femaletotal=sum(female)) %>%
+  filter(maletotal>15000 & femaletotal>15000) 
+commonswitchnames<-filter(commonnames, name %in% switchnames$name) %>% arrange(name, year)
+```
+
+Without `dplyr`:
+
+```{r, eval=FALSE}
+maletotal<-tapply(sexcomp$male, sexcomp$name, sum)
+femaletotal<-tapply(sexcomp$female, sexcomp$name, sum)
+commonnames<-sexcomp[sexcomp$name %in% names(maletotal[maletotal>15000]) &
+                       sexcomp$name %in% names(femaletotal[femaletotal>15000]),]
+commonswitchnames<-commonnames[commonnames$name %in% switchnames,]
+```
+
+
+```{r}
+commonswitchnames<-gather()
+```
+
+
+```{r, echo=FALSE}
+write.csv(commonswitchnames, "commonswitchnames.csv", row.names=FALSE)
+```
+
+
+
+## Plot
+
+Sometimes we want to put multiple plots together.  data from two different datasets on the same plot.  We have been supplying the data via `aes` to `ggplot` but you can supply it to the individual `geom`s too.
+
+To start, make a messy chart to see the names and trend patterns:
+
+```{r}
+ggplot(commonswitchnames, aes(x=year, y=maleprop)) + 
+  geom_line() +
+  facet_wrap(~name)
+```
+
+Let's tell the story of an individual name.  We'll plot the number of male and female babies over time, so we can see what's happening more fully and how the switch happened.  Note, you may be tempted to try to put the ratio lines from above on the chart too, but `ggplot2` won't allow it.  See [this explanation](http://www.perceptualedge.com/articles/visual_business_intelligence/dual-scaled_axes.pdf).
+
+Now, let's add in the number of male and female babies over time.  We're using the same x value (year), but a different y (male, female), so we need to specify the data in the `geom`, not in the main `ggplot` call:
+
+```{r}
+ggplot(commonswitchnames[commonswitchnames$name=="Alexis",], aes(x=year)) + 
+  geom_area(aes(y= male), fill="blue",alpha=.5) +
+  geom_area(aes(y=female), fill="pink", alpha=.5) +
+  labs(title="Alexis", y="Number of Babies", x)
+```
