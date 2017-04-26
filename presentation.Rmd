@@ -312,7 +312,7 @@ https://plot.ly/~RPlotBot/3260.embed
 
 # Code {data-background-color="#4E2A84" .white-font}
 
-This presentation and the code we're using are available at
+This presentation and the code we're using are available at https://nuitrcs.github.io/ggplotworkshop/
 
 
 
