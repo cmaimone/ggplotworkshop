@@ -225,6 +225,7 @@ filter(initial_props, initial %in% c("A","E","I","O","U","Y")) %>%
   theme(axis.text.x = element_text(angle = -90, vjust=.5)) 
 ```
 
+
 ```{asis, echo=answers}
 To change the factor not using `dplyr`:
 ```
@@ -321,7 +322,8 @@ ggplot(topnames, aes(x=Male, y=Female)) + geom_point() +
 Color points by how boy or girl they are, and let's make them a little bigger
 
 ```{r}
-ggplot(topnames, aes(x=Male, y=Female, color=ratio)) + geom_point(size=2) + 
+ggplot(topnames, aes(x=Male, y=Female, color=ratio)) + 
+  geom_point(size=2) + 
   lims(x=c(0,250000), y=c(0,250000)) +
   geom_abline(slope=1, intercept=0, color="gray60") + 
   scale_colour_gradient(low = "pink", high = "blue", name="Gender Split", 
@@ -331,12 +333,13 @@ ggplot(topnames, aes(x=Male, y=Female, color=ratio)) + geom_point(size=2) +
 Now, for the points we care about, let's label them.  We could label all of them, but we really just want to label the points near the line:
 
 ```{r}
-ggplot(topnames, aes(x=Male, y=Female, color=ratio)) + geom_point(size=2) + 
+ggplot(topnames, aes(x=Male, y=Female, color=ratio)) + 
+  geom_point(size=2) + 
   lims(x=c(0,150000), y=c(0,150000)) +
   geom_abline(slope=1, intercept=0, color="gray60") + 
   scale_colour_gradient(low = "pink", high = "blue", name="Gender Split", 
                         breaks=c(.9,0,-.9), labels=c("Male","Neutral","Female")) +
-  geom_text(aes(label=ifelse(ratio< .2, as.character(name), '')),
+  geom_text(aes(label=ifelse(abs(ratio)< .2, as.character(name), '')),
             hjust=-.25, vjust=0.5, color="gray10", fontface = "bold", size=3) 
 ```
 
@@ -356,7 +359,8 @@ topnames2<-gather(topnames, key="sex",value="sextotal", Male, Female)
 We only want to look at the names that score the lowest on `ratio` (absolute value).  And we already have the counts calculated, so we tell `geom_bar` that so it doesn't try to do the counting itself.
 
 ```{r}
-ggplot(topnames2[abs(topnames2$ratio)<.3,], aes(x=name, y=sextotal, group=sex, fill=sex)) + 
+ggplot(topnames2[abs(topnames2$ratio)<.3 & !is.na(topnames2$ratio),], 
+       aes(x=name, y=sextotal, group=sex, fill=sex)) + 
   geom_bar(stat="identity") +
   labs(title="Popular Unisex Names", x="", y="Count")
 ```
@@ -364,17 +368,17 @@ ggplot(topnames2[abs(topnames2$ratio)<.3,], aes(x=name, y=sextotal, group=sex, f
 Plot proportions instead of counts.  And let's use slightly different colors (there are different ways to specify colors, but below we use hex codes.  See: https://en.wikipedia.org/wiki/Web_colors):
 
 ```{r}
-ggplot(topnames2[abs(topnames2$ratio)<.3,], aes(x=name, y=sextotal, group=sex, fill=sex)) + 
+ggplot(topnames2[abs(topnames2$ratio)<.3 & !is.na(topnames2$ratio),], aes(x=name, y=sextotal, group=sex, fill=sex)) + 
   geom_bar(stat="identity", position="fill") +
   labs(title="Popular Unisex Names", x="", y="Count") + 
   geom_hline(yintercept=.5) +
-  scale_fill_manual(values=c("#ff33cc","#1e90ff"))
+  scale_fill_manual(values=c("#ff33cc","#1e90ff")) 
 ```
 
 Lose the gray background with the minimal theme, and we don't need horizontal grid lines for a bar chart:
 
 ```{r}
-ggplot(topnames2[abs(topnames2$ratio)<.3,], aes(x=name, y=sextotal, group=sex, fill=sex)) + 
+ggplot(topnames2[abs(topnames2$ratio)<.3 & !is.na(topnames2$ratio),], aes(x=name, y=sextotal, group=sex, fill=sex)) + 
   geom_bar(stat="identity") +
   labs(title="Popular Unisex Names", x="", y="Count") +
   theme_minimal() +
