@@ -1,0 +1,97 @@
+---
+title: "Visualization with R: Plotly"
+author: "Christina Maimone"
+date: '`r Sys.Date()`'
+always_allow_html: yes
+output:
+  html_document:
+    toc: yes
+    toc_float: yes
+    self_contained: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Setup
+
+It's assumed that this material is following after the `ggplot` material.  A few things we need when running this as an independent file:
+
+```{r, eval=FALSE}
+install.packages(c("plotly"))
+```
+
+
+```{r}
+library(tidyverse)
+library(plotly)
+library(babynames)
+data(babynames)
+babynames <- mutate(babynames, initial=substr(name, 1, 1))
+```
+
+
+
+# Plotly
+
+[Plotly Examples and Documentation](https://plot.ly/r/) 
+
+## `ggplotly`
+
+One of the easy things you can do with plotly is use it with a plot from `ggplot` to add tooltips when you hover over points or lines.  You can save `ggplot` plots as objects.
+
+Let's look at what's going on with baby girl names starting with A (most popular letter based on plots we made in the `ggplot` part of the workshop) by looking at the first two letters of the name:
+
+```{r}
+babynames <- mutate(babynames, first2=substr(name, 1, 2))
+anames <- babynames %>%
+  filter(initial=="A") %>%
+  group_by(year, sex, first2) %>% 
+  summarize(count=sum(n), totalprop=sum(prop)) %>%
+  ungroup()
+plot1<-filter(anames, sex=="F") %>%
+  ggplot(aes(x=year, y=totalprop, color=first2)) +
+  geom_line()
+plot1
+```
+
+Note that this approach to pulling the data is going to miss years with no observations (say for names starting with "Aw" or other uncommon pairs).  So our lines won't be 100% accurate, but we're just going to ignore that.
+
+Now, this is a messy plot, with too many lines.  It's hard to distinguish the colors.  But if we're doing exploratory analysis, it might still be useful, if we could tell what each line is.  This is where plotly comes in:
+
+```{r}
+ggplotly(plot1)
+```
+
+This would have also been very useful when we were looking at unisex names.
+
+## Plotting with Plotly
+
+You can also make plots directly with plotly.  Why?  Maybe you want plots that are prettier than the base graphics but don't like `ggplot`.  
+
+```{r}
+plot_ly(anames[anames$sex=="F",], x=~year, y=~totalprop, color=~first2, 
+        type = 'scatter', mode = 'lines')
+```
+
+Note the `~` in front of the names of the variables.  Colors and tooltips are different from the defaults from `ggplotly`.  
+
+Or maybe you want to make a 3D plot (ggplot doesn't do that).  Note that this example plot is not a good choice for something to actually plot in 3D -- just an example to show how plotly works.
+
+```{r}
+plot_ly(anames[anames$sex=="F",], x=~year, z=~totalprop, 
+        y=~first2, color=~first2, line=list(width=4)) %>% 
+  add_lines() %>%
+  layout(scene = list(xaxis = list(title = 'Year'),
+                     zaxis = list(title = 'Proportion'),
+                     yaxis = list(title = 'Starting Letters')))
+```
+
+
+## Other
+
+You can also publish plotly plots to their web service, but we're not going to cover that here.  See the plotly documentation online for examples of how to do this.
+
+
+
