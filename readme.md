@@ -10,8 +10,8 @@ This workshop also makes use of other `tidyverse` packages for data manipulation
 
 Workshop Code: You'll probably want to download the RMarkdown and follow along, executing the commands in R.
 
-* ggplot [html](https://nuitrcs.github.io/ggplotworkshop/ggplot.html) | [RMarkdown](https://nuitrcs.github.io/ggplotworkshop/ggplot.html)
-* plotly [html](https://nuitrcs.github.io/ggplotworkshop/plotly.Rmd) | [RMarkdown](https://nuitrcs.github.io/ggplotworkshop/plotly.Rmd)
+* ggplot [html](https://nuitrcs.github.io/ggplotworkshop/ggplot.html) | [RMarkdown](https://nuitrcs.github.io/ggplotworkshop/ggplot.Rmd)
+* plotly [html](https://nuitrcs.github.io/ggplotworkshop/plotly.html) | [RMarkdown](https://nuitrcs.github.io/ggplotworkshop/plotly.Rmd)
 
 Exercises (html):
 
