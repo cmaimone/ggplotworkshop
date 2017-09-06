@@ -6,22 +6,22 @@ This workshop also makes use of other `tidyverse` packages for data manipulation
 
 # Files
 
-[Presentation](https://www.githib.io/nuitrcs/ggplotworkshop/presentation.html)
+[Presentation](https://www.github.io/nuitrcs/ggplotworkshop/presentation.html)
 
 Workshop Code: You'll probably want to download the RMarkdown and follow along, executing the commands in R.
 
-* ggplot [html](https://www.githib.io/nuitrcs/ggplotworkshop/ggplot.html) | [RMarkdown](https://www.githib.io/nuitrcs/ggplotworkshop/ggplot.html)
-* plotly [html](https://www.githib.io/nuitrcs/ggplotworkshop/plotly.Rmd) | [RMarkdown](https://www.githib.io/nuitrcs/ggplotworkshop/plotly.Rmd)
+* ggplot [html](https://www.github.io/nuitrcs/ggplotworkshop/ggplot.html) | [RMarkdown](https://www.github.io/nuitrcs/ggplotworkshop/ggplot.html)
+* plotly [html](https://www.github.io/nuitrcs/ggplotworkshop/plotly.Rmd) | [RMarkdown](https://www.github.io/nuitrcs/ggplotworkshop/plotly.Rmd)
 
 Exercises (html):
 
-* [ggplot](https://www.githib.io/nuitrcs/ggplotworkshop/ggplot_exercises.html)
-* [plotly](https://www.githib.io/nuitrcs/ggplotworkshop/plotly_exercises.html)
+* [ggplot](https://www.github.io/nuitrcs/ggplotworkshop/ggplot_exercises.html)
+* [plotly](https://www.github.io/nuitrcs/ggplotworkshop/plotly_exercises.html)
 
 Exercises with answers: 
 
-* ggplot [html](https://www.githib.io/nuitrcs/ggplotworkshop/ggplot_exercises_with_answers.html) | [RMarkdown](https://www.githib.io/nuitrcs/ggplotworkshop/ggplot_exercises_with_answers.Rmd)
-* plotly [html](https://www.githib.io/nuitrcs/ggplotworkshop/plotly_exercises_with_answers.html) | [RMarkdown](https://www.githib.io/nuitrcs/ggplotworkshop/plotly_exercises_with_answers.Rmd)
+* ggplot [html](https://www.github.io/nuitrcs/ggplotworkshop/ggplot_exercises_with_answers.html) | [RMarkdown](https://www.github.io/nuitrcs/ggplotworkshop/ggplot_exercises_with_answers.Rmd)
+* plotly [html](https://www.github.io/nuitrcs/ggplotworkshop/plotly_exercises_with_answers.html) | [RMarkdown](https://www.github.io/nuitrcs/ggplotworkshop/plotly_exercises_with_answers.Rmd)
 
 
 # Note
