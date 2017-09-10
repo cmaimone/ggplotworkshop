@@ -31,13 +31,19 @@ The workshop materials use data on baby names from the Social Security Administr
 
 # Resources
 
+See additional resources and links to some visualization examples in the [main R workshop repository](https://github.com/nuitrcs/rworkshops).
+
 ## Reference
+
+[`ggplot` Cheat Sheet](https://www.rstudio.com/wp-content/uploads/2015/03/ggplot2-cheatsheet.pdf): you'll want to have this for reference
 
 [R Graph Gallery](http://www.r-graph-gallery.com/portfolio/ggplot2-package/) for `ggplot`
 
 [R Graphics Cookbook](https://ase.tufts.edu/bugs/guide/assets/R%20Graphics%20Cookbook.pdf)
 
 [Cookbook for R](http://www.cookbook-r.com/Graphs/)
+
+[`ggplot` Data Visualization Vocabulary](https://medium.com/@kierisi/fc8fa4d20d2d) from Jesse Maegan: confused by unfamiliar terms in the `ggplot` help and functions?  You can find explanations of many of them here.
 
 ## Tutorials
 
@@ -59,7 +65,9 @@ Software Carpentry: [R for Reproducible Scientific Analysis](http://swcarpentry.
 
 [`ggplot2` Elegant Graphics for Data Analysis](http://ggplot2.org/book/) by Hadley Wickam, who wrote the package.  The book can also be downloaded as a pdf by going through the Library.  The book's code is [here](https://github.com/hadley/ggplot2-book).
 
-[R for Data Science](http://r4ds.had.co.nz/): free online book using the `tidyverse` of packages, includes a chapter on [Graphics for communication](http://r4ds.had.co.nz/graphics-for-communication.html) which doesn't teach `ggplot` so much as give you good principles of making charts with it.
+[R for Data Science](http://r4ds.had.co.nz/): free online book using the `tidyverse` of packages, has a chapter on [data visualization](http://r4ds.had.co.nz/data-visualisation.html).  It includes a chapter on [Graphics for communication](http://r4ds.had.co.nz/graphics-for-communication.html) which doesn't teach `ggplot` so much as give you good principles of making charts with it.
+
+[Data Visualization for Social Science](http://socviz.co/): by Kieran Healy, an online book that uses `ggplot`
 
 ## Plotly
 

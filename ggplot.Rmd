@@ -112,6 +112,38 @@ ggplot(initial_props[initial_props$initial=="A",],
        aes(y=totalprop, x=year, color=sex)) + geom_line()
 ```
 
+
+Or instead of color, we could change line type:
+
+```{r}
+initial_props %>% filter(initial=="A") %>% 
+  ggplot(aes(y=totalprop, x=year, linetype=sex)) + geom_line()
+```
+
+The aesthetics we can use are determined by the geom, and are listed on the geom's help pages.  We can also be clearer about this relationship and specify the aesthetics mappings with the geom call, instead of `ggplot`.
+
+```{r, eval=FALSE}
+initial_props %>% filter(initial=="A") %>% 
+  ggplot() + 
+  geom_line(aes(y=totalprop, x=year, linetype=sex))
+
+initial_props %>% filter(initial=="A") %>% 
+  ggplot(aes(y=totalprop, x=year)) + 
+  geom_line(aes(linetype=sex))
+```
+
+## Aesthetics vs. Styling
+
+If, instead of mapping data to characteristics of a plot, we just want to change the colors (or other appearance), we have options for that outside of the `aes()` call:
+
+```{r}
+initial_props %>% filter(initial=="A") %>% 
+  ggplot(aes(y=totalprop, x=year, linetype=sex)) + 
+  geom_line(color="red", size=1)
+```
+
+
+
 ## Facets
 
 Instead of just one letter, we could make a plot for each letter using facets:
@@ -124,7 +156,7 @@ ggplot(initial_props, aes(y=totalprop, x=year, color=sex)) +
 
 Note that above, we split the plot creation commands on multiple lines.  If you do this, make sure to end the line with a `+` or split within a `()` so that R doesn't think you're done with the line.  
 
-For facets, the options are `facet_wrap`, which automatically lays out rows and columns, or `facet_grid` which can be used to specify values to spread over rows or columns.  Facets use the formula specification, which is `y~x`.  So variables to the left of `~` specify layout down the y-axis (so appearing as rows), while variables to the right specify layout along the x axis (so appearing as columns)  For `facet_wrap` you always just put the variable on the right of `~`.  You can change the default layout with other options to the function.  You can use facets with multiple variables.
+For facets, the options are `facet_wrap`, which automatically determines the number of rows and columns and fills the spots with the plots, or `facet_grid` which can be used to specify values to spread over rows or columns.  Facets use the formula specification, which is `y~x`.  So variables to the left of `~` specify layout down the y-axis (so appearing as rows), while variables to the right specify layout along the x axis (so appearing as columns).  For `facet_wrap` you always just put the variable on the right of `~`.  You can change the default layout with other options to the function.  You can use facets with multiple variables.
 
 You can see that by default all of the plots have the same axes -- the same range.  This lets you compare easily across plots, but you can change this.  
 
