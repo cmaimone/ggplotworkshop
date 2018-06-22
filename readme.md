@@ -1,3 +1,5 @@
+**Materials have not been updated yet for Summer 2018 - in progress.**
+
 # R Visualization
 
 This workshop focuses on `ggplot2` for making plots in R.  The workshop also briefly covers `plotly`.  
