@@ -51,6 +51,7 @@ See additional resources and links to some visualization examples in the [main R
 
 [`ggplot` Tutorial](http://tutorials.iq.harvard.edu/R/Rgraphics/Rgraphics.html) From the Harvard IQSS Data Science Services group.
 
+[Getting started with data visualization in R using `ggplot`](http://www.storybench.org/getting-started-data-visualization-r-using-ggplot2) from Martin Frigaard at Storybench
 
 [`ggplot` Tutorial](http://r-statistics.co/ggplot2-Tutorial-With-R.html) from Selva Prabhakaran with examples of many different kinds of plots
 
