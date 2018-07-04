@@ -1,4 +1,4 @@
-**Updated materials are available at https://github.com/nuitrcs/r_ggplot_june2018.**
+**Updated materials are available at https://github.com/nuitrcs/r_ggplot_july2018.**
 
 # R Visualization
 
