@@ -74,7 +74,6 @@ Software Carpentry: [R for Reproducible Scientific Analysis](http://swcarpentry.
 
 ## Plotly
 
-[Plotly Tutorial](https://www.datacamp.com/community/blog/a-free-interactive-plotly-r-tutorial)
 
 [Plotly for R](https://cpsievert.github.io/plotly_book/index.html) by Carson Sievert
 
